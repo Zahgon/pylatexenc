@@ -1,61 +1,55 @@
 pylatexenc
 ==========
 
-Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion
+Simple LaTeX parser providing latex-to-unicode and unicode-to-latex conversion,
+as a Go module.
 
 .. image:: https://img.shields.io/github/license/phfaist/pylatexenc.svg?style=flat
    :target: https://github.com/phfaist/pylatexenc/blob/master/LICENSE.txt
 
-.. image:: https://img.shields.io/travis/phfaist/pylatexenc.svg?style=flat
-   :target: https://travis-ci.org/phfaist/pylatexenc
-   
-.. image:: https://img.shields.io/pypi/v/pylatexenc.svg?style=flat
-   :target: https://pypi.org/project/pylatexenc/
-
-.. image:: https://img.shields.io/lgtm/alerts/g/phfaist/pylatexenc.svg?logo=lgtm&logoWidth=18&style=flat
-   :target: https://lgtm.com/projects/g/phfaist/pylatexenc/alerts/
+This is a Go port of pylatexenc 2.11. It returns exactly what the Python library
+returns, errors included: ``go get github.com/phfaist/pylatexenc`` and import the
+packages below. The module has no dependencies outside the Go standard library.
 
 
 Unicode Text to LaTeX code
 --------------------------
 
-The ``pylatexenc.latexencode`` module provides a function ``unicode_to_latex()``
-which converts a unicode string into LaTeX text and escape sequences. It should
-recognize accented characters and most math symbols. A couple of switches allow
-you to alter how this function behaves.
+The ``latexencode`` package provides ``UnicodeToLatex()``, which converts a
+unicode string into LaTeX text and escape sequences. It should recognize
+accented characters and most math symbols. The fields of
+``latexencode.Options`` alter how it behaves, and an ``UnicodeToLatexEncoder``
+can carry custom conversion rules. ``PartialLatexToLatexEncoder`` encodes text
+that already contains some LaTeX, keeping the LaTeX characters you name::
 
-You can also run ``latexencode`` in command-line to convert plain unicode text
-(from the standard input or from files given on the command line) into LaTeX
-code, written on to the standard output.
-
-A third party plug-in for Vim
-`vim-latexencode <https://github.com/Konfekt/vim-latexencode>`_
-by `@Konfekt <https://github.com/Konfekt>`_
-provides a corresponding command to operate on a given range.
+    s, err := latexencode.UnicodeToLatex("café – α", latexencode.DefaultOptions())
+    // s == `caf\'e {\textendash} \ensuremath{\alpha}`
 
 
 Parsing LaTeX code & converting to plain text (unicode)
 -------------------------------------------------------
 
-The ``pylatexenc.latexwalker`` module provides a series of routines that parse
-the LaTeX structure of given LaTeX code and returns a logical structure of
-objects, which can then be used to produce output in another format such as
-plain text.  This is not a replacement for a full (La)TeX engine, rather, this
-module provides a way to parse a chunk of LaTeX code as mark-up code.
+The ``latexwalker`` package parses the LaTeX structure of given LaTeX code and
+returns a logical structure of nodes, which can then be used to produce output in
+another format such as plain text.  This is not a replacement for a full (La)TeX
+engine, rather, it provides a way to parse a chunk of LaTeX code as mark-up code.
+Its context databases hold the macro, environment and specials definitions that
+drive the parser.
 
-The ``pylatexenc.latex2text`` module builds up on top of
-``pylatexenc.latexwalker`` and provides functions to convert given LaTeX code to
-plain text with unicode characters.
+The ``latex2text`` package builds up on top of ``latexwalker`` and converts given
+LaTeX code to plain text with unicode characters::
 
-You can also run ``latex2text`` in command-line to convert LaTeX input (either
-from the standard input, or from files given on the command line) into plain
-text written on the standard output.
+    l, _ := latex2text.NewLatexNodes2Text(latex2text.DefaultOptions())
+    text, err := l.LatexToText(`\'{e}t\'{e} \textbf{caf\"e}`, latexwalker.DefaultOptions())
+    // text == "été cafë"
 
 
 Documentation
 -------------
 
-Full documentation is available at https://pylatexenc.readthedocs.io/.
+The documentation of the Python library, in ``doc/`` and at
+https://pylatexenc.readthedocs.io/, describes the behaviour; the Go packages keep
+its names, with methods and options in Go's spelling.
 
 
 License
